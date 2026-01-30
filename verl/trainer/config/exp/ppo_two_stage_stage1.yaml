@@ -1,0 +1,50 @@
+# @package _global_
+# Base configs to inherit.
+defaults:
+
+  # Base PPO trainer config.
+  - /ppo_trainer
+  # LLM judge reward config.
+  - override /reward_model@reward_model: reward_model
+  - override /critic@critic: dp_critic
+  # Self override.
+  - _self_
+
+# Algorithm configuration.
+algorithm:
+
+  # Advantage estimator type for GRPO.
+  adv_estimator: grpo
+    
+  # Whether to normalize advantages by std (specific to GRPO).
+  norm_adv_by_std_in_grpo: true
+
+  # Std epsilon for GRPO reward std; groups below this are skipped.
+  reward_std_eps: 1e-6
+
+  # Whether to apply an extra global normalization after group z-score.
+  apply_global_reward_norm: false
+
+# Rollout configuration.
+actor_rollout_ref:
+
+  # Rollout settings for training.
+  rollout:
+
+    # Number of responses per prompt (GRPO group size).
+    n: 8
+
+# Trainer configuration.
+trainer:
+
+  # Directory to dump Stage1 rollouts (used by Stage2 drop list script).
+  rollout_data_dir: ${oc.env:STAGE1_ROLLOUT_DIR,outputs/rollout_stage1}
+  val_before_train: false
+  test_freq: -1
+
+# Data configuration.
+data:
+
+  # RL training parquet for Stage1 (all samples).
+  train_files: ${oc.env:TRAIN_RL_PATH,}
+  val_files: ${data.train_files}
