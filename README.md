@@ -14,7 +14,7 @@ We use **Volc Engine**’s official **Seed-1.6** service as a rule-based reward 
 
 To enable it, fill in the API key and the corresponding model endpoint in:
 
-`/Users/staudinger/Desktop/anonymous/verl/trainer/config/reward_model/reward_model.yaml`
+`verl/trainer/config/reward_model/reward_model.yaml`
 
 The prompt field in the YAML is optional, since prompts are already defined in:
 
@@ -25,10 +25,10 @@ The prompt field in the YAML is optional, since prompts are already defined in:
 We provide the following scripts:
 
 - **SFT training script**:  
-  `/Users/staudinger/Desktop/anonymous/sft_train.sh`
+  `sft_train.sh`
 
 - **RL-related scripts** (all RL scripts are under):  
-  `/Users/staudinger/Desktop/anonymous/examples/rl_for_vera`  
+  `examples/rl_for_vera`  
   To use them, you need to set key paths such as `BASE_MODEL`, `TOKENIZER_PATH`, `TRAIN_FILES`, `OUTPUT_DIR`, etc.
 
 Example configuration:
