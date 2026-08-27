@@ -1,24 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-export BASE_MODEL=
-export TOKENIZER_PATH=
-export TRAIN_FILES=
-export OUTPUT_DIR=
+export BASE_MODEL="${BASE_MODEL:-}"
+export TOKENIZER_PATH="${TOKENIZER_PATH:-}"
+export TRAIN_FILES="${TRAIN_FILES:-}"
+export OUTPUT_DIR="${OUTPUT_DIR:-}"
 
 # ===== SP (Ulysses Sequence Parallel) =====
-export SP_SIZE=
+export SP_SIZE="${SP_SIZE:-}"
 
 # ===== Batch / length =====
 export TRAIN_BATCH_SIZE=8            
 export MICRO_BATCH_SIZE=1            
-export MAX_LEN=             
+export MAX_LEN="${MAX_LEN:-}"
 export MAX_TOKEN_LEN_PER_GPU=25000      
 
 # ===== Optim =====
 export TOTAL_EPOCHS=1
 export MAX_STEPS=null              
-export LEARNING_RATE=1e-5
+export LEARNING_RATE="${LEARNING_RATE:-5e-6}"
 export WEIGHT_DECAY=0.0
 export WARMUP_RATIO=0.03
 export MAX_GRAD_NORM=1.0
@@ -27,8 +27,8 @@ export SEED=42
 
 # ===== Logging / ckpt =====
 export LOG_BACKEND=wandb
-export PROJECT_NAME=
-export EXPERIMENT_NAME=
+export PROJECT_NAME="${PROJECT_NAME:-}"
+export EXPERIMENT_NAME="${EXPERIMENT_NAME:-}"
 export SAVE_FREQ=10
 export EVAL_FREQ=-1
 
@@ -78,4 +78,4 @@ torchrun --standalone --nnodes=1 --nproc_per_node=8 --master_port=29500 \
   optim.lr_scheduler_type="$LR_SCHEDULER" \
   optim.clip_grad="$MAX_GRAD_NORM"
 
-echo "SFT finished. Model saved to $OUTPUT_DIR"
+echo "SFT finished. Sharded checkpoints saved to $OUTPUT_DIR; merge the final global_step directory for RL use."

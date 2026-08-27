@@ -2,7 +2,7 @@
 # k8s: pin Ray/c10d to pod IP + NIC to avoid Service DNS in Gloo/NCCL.
 
 export VERL_LOGGING_LEVEL=INFO
-# 正常启动训练即可
+# Start training normally.
 RAY_RUNTIME_ENV_ARGS=()
 RAY_START_ARGS=(--head)
 if [[ -f /var/run/secrets/kubernetes.io/serviceaccount/token ]]; then
@@ -201,7 +201,7 @@ python3 -m verl.trainer.main_ppo \
   ray_kwargs.ray_init.num_cpus=null \
   "${RAY_RUNTIME_ENV_ARGS[@]}" \
   "${REWARD_MANAGER_ARGS[@]}" \
-  "${STAGE1_RESUME_ARGS[@]}" \
+  ${STAGE1_RESUME_ARGS[@]+"${STAGE1_RESUME_ARGS[@]}"} \
   trainer.project_name="$PROJECT_NAME" \
   trainer.experiment_name="$STAGE1_EXPERIMENT" \
   trainer.default_local_dir="$STAGE1_OUTPUT_DIR" \

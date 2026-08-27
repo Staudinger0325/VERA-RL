@@ -43,12 +43,12 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 CONFIG_PATH="${REPO_ROOT}/verl/trainer/config"
 
 # ===== Paths =====
-export BASE_MODEL=
-export TOKENIZER_PATH=
-export TRAIN_RL_PATH=
+export BASE_MODEL="${BASE_MODEL:-}"
+export TOKENIZER_PATH="${TOKENIZER_PATH:-}"
+export TRAIN_RL_PATH="${TRAIN_RL_PATH:-}"
 
-export STAGE1_OUTPUT_DIR=
-export STAGE1_ROLLOUT_DIR=
+export STAGE1_OUTPUT_DIR="${STAGE1_OUTPUT_DIR:-}"
+export STAGE1_ROLLOUT_DIR="${STAGE1_ROLLOUT_DIR:-}"
 
 # ===== Shared rollouts =====
 export ROLLOUT_ENGINE=vllm
@@ -82,7 +82,7 @@ REWARD_MANAGER_ARGS=(
 )
 
 # ===== Stage1 hyperparameters (same as run_main.sh) =====
-export STAGE1_TOTAL_STEPS=50
+export STAGE1_TOTAL_STEPS="${STAGE1_TOTAL_STEPS:-50}"
 export STAGE1_TRAIN_BATCH_SIZE=32
 export STAGE1_PPO_MINI_BATCH=1
 export STAGE1_PPO_MICRO_BATCH=1
@@ -181,7 +181,7 @@ python3 -m verl.trainer.main_ppo \
   ray_kwargs.ray_init.num_cpus=null \
   "${RAY_RUNTIME_ENV_ARGS[@]}" \
   "${REWARD_MANAGER_ARGS[@]}" \
-  "${STAGE1_RESUME_ARGS[@]}" \
+  ${STAGE1_RESUME_ARGS[@]+"${STAGE1_RESUME_ARGS[@]}"} \
   trainer.project_name="$PROJECT_NAME" \
   trainer.experiment_name="$STAGE1_EXPERIMENT" \
   trainer.default_local_dir="$STAGE1_OUTPUT_DIR" \

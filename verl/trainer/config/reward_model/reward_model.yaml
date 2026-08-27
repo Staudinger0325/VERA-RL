@@ -63,13 +63,13 @@ reward_manager: llm_judge
 launch_reward_fn_async: False
 
 # Extra kwargs forwarded to the reward manager.
-# For `llm_judge`, please填充 per-category prompt 到 `verl/workers/reward_manager/llm_prompts.py`。
-# 这里的 prompt_template 作为兜底（可空），也可在此覆盖 category_prompts。
+# Define per-category `llm_judge` prompts in `verl/workers/reward_manager/llm_prompts.py`.
+# `prompt_template` is an optional fallback; `category_prompts` can override it here.
 reward_kwargs:
   judge:
     api_url: https://ark.cn-beijing.volces.com/api/v3/chat/completions
     model: 
-    api_key: ""  # Fill with your DashScope API key if required.
+    api_key: ""  # Leave empty and provide ARK_API_KEY through the environment.
     prompt_template: ""  # optional fallback prompt. Supports {input}, {output}, {category}.
     category_prompts:
       scan: ""    # optional override; otherwise use llm_prompts.py

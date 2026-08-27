@@ -2,7 +2,7 @@
 # k8s: pin Ray/c10d to pod IP + NIC to avoid Service DNS in Gloo/NCCL.
 
 export VERL_LOGGING_LEVEL=INFO
-# 正常启动训练即可
+# Start training normally.
 RAY_RUNTIME_ENV_ARGS=()
 RAY_START_ARGS=(--head)
 if [[ -f /var/run/secrets/kubernetes.io/serviceaccount/token ]]; then
@@ -46,15 +46,15 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 CONFIG_PATH="${REPO_ROOT}/verl/trainer/config"
 
 # ===== Paths =====
-export BASE_MODEL=
-export TOKENIZER_PATH=
-export TRAIN_RL_PATH=
+export BASE_MODEL="${BASE_MODEL:-}"
+export TOKENIZER_PATH="${TOKENIZER_PATH:-}"
+export TRAIN_RL_PATH="${TRAIN_RL_PATH:-}"
 
-export STAGE1_OUTPUT_DIR=
-export STAGE1_ROLLOUT_DIR=
+export STAGE1_OUTPUT_DIR="${STAGE1_OUTPUT_DIR:-}"
+export STAGE1_ROLLOUT_DIR="${STAGE1_ROLLOUT_DIR:-}"
 
-export STAGE2_OUTPUT_DIR=
-export STAGE2_DROP_LIST=
+export STAGE2_OUTPUT_DIR="${STAGE2_OUTPUT_DIR:-}"
+export STAGE2_DROP_LIST="${STAGE2_DROP_LIST:-}"
 
 # ===== Shared rollouts (override in stage blocks if needed) =====
 export ROLLOUT_ENGINE=vllm
@@ -62,10 +62,10 @@ export ROLLOUT_DTYPE=bfloat16
 export ROLLOUT_TP=1
 export ROLLOUT_DP=8
 export ROLLOUT_GPU_MEM_UTIL=0.5
-export ROLLOUT_MAX_MODEL_LEN=
-export ROLLOUT_MAX_BATCHED_TOKENS=
+export ROLLOUT_MAX_MODEL_LEN="${ROLLOUT_MAX_MODEL_LEN:-}"
+export ROLLOUT_MAX_BATCHED_TOKENS="${ROLLOUT_MAX_BATCHED_TOKENS:-}"
 export ROLLOUT_MAX_SEQS=1
-export ROLLOUT_PROMPT_LEN=
+export ROLLOUT_PROMPT_LEN="${ROLLOUT_PROMPT_LEN:-}"
 export ROLLOUT_RESP_LEN=2048
 export VLLM_SERVER_START_TIMEOUT_S=3600   # 30min
 
@@ -94,7 +94,7 @@ export VAR_THRESHOLD=0.02
 export MIN_COUNT=8
 
 # ===== Stage1 hyperparameters =====
-export STAGE1_TOTAL_STEPS=50
+export STAGE1_TOTAL_STEPS="${STAGE1_TOTAL_STEPS:-50}"
 export STAGE1_TRAIN_BATCH_SIZE=32
 export STAGE1_PPO_MINI_BATCH=1
 export STAGE1_PPO_MICRO_BATCH=1
@@ -142,6 +142,10 @@ export STAGE2_CLIP_HIGH=0.5
 export STAGE2_SEED=42
 export STAGE2_SAVE_FREQ=10
 export STAGE2_NGPUS=8
+
+# The paper's main run is Stage 1. The experimental reward-filtered Stage 2 is
+# retained for development but is opt-in because its release config is absent.
+RUN_FILTERED_STAGE2="${RUN_FILTERED_STAGE2:-false}"
 
 echo "[stage1] train on full train_RL.parquet"
 python3 -m verl.trainer.main_ppo \
@@ -203,7 +207,7 @@ python3 -m verl.trainer.main_ppo \
   ray_kwargs.ray_init.num_cpus=null \
   "${RAY_RUNTIME_ENV_ARGS[@]}" \
   "${REWARD_MANAGER_ARGS[@]}" \
-  "${STAGE1_RESUME_ARGS[@]}" \
+  ${STAGE1_RESUME_ARGS[@]+"${STAGE1_RESUME_ARGS[@]}"} \
   trainer.project_name="$PROJECT_NAME" \
   trainer.experiment_name="$STAGE1_EXPERIMENT" \
   trainer.default_local_dir="$STAGE1_OUTPUT_DIR" \
@@ -212,6 +216,11 @@ python3 -m verl.trainer.main_ppo \
   trainer.total_epochs=100000 \
   trainer.save_freq="$STAGE1_SAVE_FREQ" \
   trainer.n_gpus_per_node="$STAGE1_NGPUS" 
+
+if [[ "$RUN_FILTERED_STAGE2" != "true" ]]; then
+  echo "[done] mixed-task RL stage complete; skipping optional filtered stage2"
+  exit 0
+fi
 
 echo "[stage2] build drop list from stage1 rollouts"
 python3 scripts/build_stage2_drop_list.py \

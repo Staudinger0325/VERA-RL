@@ -388,7 +388,7 @@ class LLMJudgeClient:
                         exc,
                     )
 
-            # 对 JSON 解析失败无限重试；仅对 API 异常遵循 max_retries（若配置了）。
+            # Retry JSON parse failures indefinitely; apply max_retries only to API errors when configured.
             is_parse_error = isinstance(last_err, ValueError)
             if (
                 self.config.max_retries is not None
